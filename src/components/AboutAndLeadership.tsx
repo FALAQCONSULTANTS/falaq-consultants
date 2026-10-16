@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { EXPERTS_LIST } from '../data/mockData';
 import { useLanguage } from '../context/LanguageContext';
 import { 
@@ -9,11 +10,81 @@ import {
   CheckCircle2, 
   ExternalLink,
   User,
-  MapPin
+  MapPin,
+  Camera,
+  Upload,
+  Loader2,
+  Check
 } from 'lucide-react';
 
 export default function AboutAndLeadership() {
   const { isAr, t } = useLanguage();
+
+  const [customExpertImages, setCustomExpertImages] = useState<Record<string, string>>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('falaq_expert_img_eng-abdulaziz-alharbi');
+        if (saved) return { 'eng-abdulaziz-alharbi': saved };
+      }
+    } catch {}
+    return {};
+  });
+
+  const [uploadLocked, setUploadLocked] = useState<Record<string, boolean>>(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const locked = localStorage.getItem('falaq_expert_upload_locked_eng-abdulaziz-alharbi');
+        if (locked === 'true') return { 'eng-abdulaziz-alharbi': true };
+      }
+    } catch {}
+    return {};
+  });
+
+  const [uploadingId, setUploadingId] = useState<string | null>(null);
+  const [successToast, setSuccessToast] = useState<string | null>(null);
+
+  const handlePhotoUpload = async (expertId: string, file: File) => {
+    if (!file) return;
+    setUploadingId(expertId);
+    try {
+      const reader = new FileReader();
+      reader.onload = async (e) => {
+        const base64Data = e.target?.result as string;
+        if (!base64Data) return;
+
+        // Immediately update UI & localStorage
+        setCustomExpertImages((prev) => ({ ...prev, [expertId]: base64Data }));
+        setUploadLocked((prev) => ({ ...prev, [expertId]: true }));
+        try {
+          localStorage.setItem(`falaq_expert_img_${expertId}`, base64Data);
+          localStorage.setItem(`falaq_expert_upload_locked_${expertId}`, 'true');
+        } catch {}
+
+        setSuccessToast(
+          isAr
+            ? 'تم حفظ صورة المهندس بنجاح!'
+            : 'Photo saved successfully!'
+        );
+        setTimeout(() => setSuccessToast(null), 5000);
+
+        // Call server to persist and push to Git/Vercel
+        try {
+          await fetch('/api/upload-expert-image', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ expertId, base64Data }),
+          });
+        } catch (err) {
+          console.warn('Backend expert image sync:', err);
+        }
+      };
+      reader.readAsDataURL(file);
+    } catch (err) {
+      console.error('Error reading photo:', err);
+    } finally {
+      setUploadingId(null);
+    }
+  };
 
   const englishExperts = [
     {
@@ -171,6 +242,14 @@ export default function AboutAndLeadership() {
           </div>
         </div>
 
+        {/* Success toast if photo uploaded */}
+        {successToast && (
+          <div className="max-w-md mx-auto mb-6 p-3 bg-[#EAF5EC] border border-[#BDE5C4] text-[#1E5D2A] text-xs font-th-bold rounded-sm flex items-center justify-center gap-2 shadow-xs transition-all">
+            <Check className="w-4 h-4 text-[#1E5D2A]" />
+            <span>{successToast}</span>
+          </div>
+        )}
+
         {/* Board of Experts Cards */}
         <div className="space-y-6">
           <div className="flex items-center justify-between border-b border-[#E0E1DC] pb-4">
@@ -185,17 +264,23 @@ export default function AboutAndLeadership() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {experts.map((expert) => (
+            {experts.map((expert) => {
+              const photoUrl = customExpertImages[expert.id] || (expert.image && expert.image.trim() !== '' ? expert.image : null);
+              const isLocked = Boolean(uploadLocked[expert.id]);
+              const isSingleUseUploadEligible = expert.id === 'eng-abdulaziz-alharbi' && !photoUrl && !isLocked;
+              const isCurrentUploading = uploadingId === expert.id;
+
+              return (
               <div
                 key={expert.id}
                 className={`bg-white border border-[#E0E1DC] p-6 sm:p-7 rounded-sm shadow-xs hover:border-[#343A2F] transition-all ${isAr ? 'text-right' : 'text-left'} flex flex-col justify-between group`}
               >
                 <div>
-                  {/* Top Bar: Avatar & SCE Badge */}
+                  {/* Top Bar: Avatar & SCE Badge & Single-Use Upload Trigger */}
                   <div className="flex items-start justify-between gap-4 mb-5">
                     
-                    {/* SCE & Verification Badge */}
-                    <div className="flex flex-col items-start gap-1">
+                    {/* SCE & Verification Badge & Single-Use Upload Button */}
+                    <div className="flex flex-col items-start gap-1.5">
                       {expert.sceNumber && (
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#F5F4F0] border border-[#E0E1DC] text-[11px] font-th-medium text-[#0E1910] font-thmanyah-sans">
                           <ShieldCheck className="w-3.5 h-3.5 text-[#0E1910]" />
@@ -207,17 +292,88 @@ export default function AboutAndLeadership() {
                           {isAr ? `خبرة ${expert.experienceYears} عاماً` : `${expert.experienceYears} Years Exp.`}
                         </span>
                       ) : null}
+
+                      {/* Single-Use Upload Button (خيار إضافة صورة لمرة واحدة) */}
+                      {isSingleUseUploadEligible && (
+                        <label className="cursor-pointer inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#F4E95B] hover:bg-[#eae04c] text-[#0E1910] text-[11px] font-th-bold border border-[#0E1910] shadow-xs transition-all active:scale-95 font-thmanyah-sans animate-pulse hover:animate-none">
+                          {isCurrentUploading ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin text-[#0E1910]" />
+                              <span>{isAr ? 'جاري الحفظ...' : 'Uploading...'}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Camera className="w-3.5 h-3.5 text-[#0E1910]" />
+                              <span>{isAr ? 'إضافة صورة (لمرة واحدة)' : 'Upload Photo (Single Use)'}</span>
+                            </>
+                          )}
+                          <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            disabled={isCurrentUploading}
+                            onChange={(e) => {
+                              const f = e.target.files?.[0];
+                              if (f) handlePhotoUpload(expert.id, f);
+                            }}
+                          />
+                        </label>
+                      )}
                     </div>
 
-                    {/* Expert Photo / Placeholder Avatar */}
+                    {/* Expert Photo / Placeholder Avatar / Interactive Upload Box */}
                     <div className="relative shrink-0">
-                      <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-sm overflow-hidden border border-[#E0E1DC] shadow-xs group-hover:border-[#343A2F] transition-colors bg-[#F5F4F0]">
-                        {expert.image && expert.image.trim() !== '' ? (
-                          <img
-                            src={expert.image}
-                            alt={expert.name}
-                            className="w-full h-full object-cover object-top"
-                          />
+                      <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-sm overflow-hidden border border-[#E0E1DC] shadow-xs group-hover:border-[#343A2F] transition-colors bg-[#F5F4F0] relative">
+                        {photoUrl ? (
+                          <>
+                            <img
+                              src={photoUrl}
+                              alt={expert.name}
+                              className="w-full h-full object-cover object-top"
+                            />
+                            {/* Subtle edit button on hover if ever needed */}
+                            {expert.id === 'eng-abdulaziz-alharbi' && (
+                              <label
+                                className="cursor-pointer absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white text-[10px] font-th-bold font-thmanyah-sans gap-0.5"
+                                title={isAr ? 'تحديث الصورة' : 'Update photo'}
+                              >
+                                <Camera className="w-4 h-4 text-[#F4E95B]" />
+                                <span>{isAr ? 'تعديل' : 'Edit'}</span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={(e) => {
+                                    const f = e.target.files?.[0];
+                                    if (f) handlePhotoUpload(expert.id, f);
+                                  }}
+                                />
+                              </label>
+                            )}
+                          </>
+                        ) : isSingleUseUploadEligible ? (
+                          <label className="cursor-pointer w-full h-full flex flex-col items-center justify-center bg-[#F5F4F0] hover:bg-[#ECEBE4] text-[#0E1910] transition-all p-2 border-2 border-dashed border-[#C0886A]">
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              disabled={isCurrentUploading}
+                              onChange={(e) => {
+                                const f = e.target.files?.[0];
+                                if (f) handlePhotoUpload(expert.id, f);
+                              }}
+                            />
+                            {isCurrentUploading ? (
+                              <Loader2 className="w-5 h-5 animate-spin text-[#0E1910]" />
+                            ) : (
+                              <>
+                                <Camera className="w-6 h-6 stroke-[1.8] text-[#0E1910] mb-1" />
+                                <span className="text-[9px] font-th-bold font-thmanyah-sans text-center leading-tight">
+                                  {isAr ? 'إضافة صورة' : 'Add Photo'}
+                                </span>
+                              </>
+                            )}
+                          </label>
                         ) : (
                           <div className="w-full h-full flex flex-col items-center justify-center bg-[#F5F4F0] text-[#343A2F] group-hover:bg-[#0E1910] group-hover:text-[#F4E95B] transition-all p-2">
                             <User className="w-7 h-7 sm:w-8 sm:h-8 stroke-[1.6] mb-0.5 opacity-85 group-hover:opacity-100 transition-opacity" />
@@ -301,7 +457,8 @@ export default function AboutAndLeadership() {
                 </div>
 
               </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 

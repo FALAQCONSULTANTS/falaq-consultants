@@ -404,6 +404,81 @@ async function startServer() {
     });
   });
 
+  // POST upload expert image (e.g. for Eng. Abdulaziz Al-Harbi single-use upload)
+  app.post('/api/upload-expert-image', async (req, res) => {
+    try {
+      const { expertId, base64Data } = req.body;
+      if (!expertId || !base64Data) {
+        return res.status(400).json({ error: 'Missing expertId or base64Data' });
+      }
+      const cleanBase64 = base64Data.replace(/^data:image\/[\w+.-]+;base64,/, '');
+      const buffer = Buffer.from(cleanBase64, 'base64');
+      const filename = expertId === 'eng-abdulaziz-alharbi' ? 'eng_abdulaziz.jpg' : `${expertId}.jpg`;
+      const publicPath = `/images/experts/${filename}`;
+
+      const dirs = [
+        path.join(__dirname, 'public', 'images', 'experts'),
+        path.join(__dirname, 'dist', 'images', 'experts'),
+      ];
+      for (const dir of dirs) {
+        try {
+          if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+          fs.writeFileSync(path.join(dir, filename), buffer);
+        } catch {}
+      }
+
+      // Update mockData.ts
+      try {
+        if (fs.existsSync(MOCK_DATA_PATH)) {
+          let content = fs.readFileSync(MOCK_DATA_PATH, 'utf-8');
+          const expertRegex = new RegExp(`(id:\\s*['"]${expertId}['"][\\s\\S]*?)(location:)`, 'm');
+          if (expertRegex.test(content) && !content.includes(`image: '${publicPath}'`)) {
+            content = content.replace(expertRegex, `$1image: '${publicPath}',\n    $2`);
+            fs.writeFileSync(MOCK_DATA_PATH, content, 'utf-8');
+          }
+        }
+      } catch (e) {
+        console.error('Error updating mockData with expert image:', e);
+      }
+
+      // Update AboutAndLeadership.tsx
+      try {
+        const aboutPath = path.join(__dirname, 'src', 'components', 'AboutAndLeadership.tsx');
+        if (fs.existsSync(aboutPath)) {
+          let content = fs.readFileSync(aboutPath, 'utf-8');
+          const expertRegex = new RegExp(`(id:\\s*['"]${expertId}['"][\\s\\S]*?)(location:)`, 'm');
+          if (expertRegex.test(content) && !content.includes(`image: '${publicPath}'`)) {
+            content = content.replace(expertRegex, `$1image: '${publicPath}',\n      $2`);
+            fs.writeFileSync(aboutPath, content, 'utf-8');
+          }
+        }
+      } catch (e) {
+        console.error('Error updating AboutAndLeadership with expert image:', e);
+      }
+
+      // Automatically commit and push to GitHub so Vercel redeploys the new photo
+      try {
+        const { exec } = await import('child_process');
+        exec(
+          `git add public/images/experts/${filename} src/data/mockData.ts src/components/AboutAndLeadership.tsx && git commit -m "Upload image for ${expertId}" && git push origin main`,
+          { cwd: __dirname },
+          (err, stdout, stderr) => {
+            if (err) console.error('Git push error on expert upload:', err);
+            else console.log('Git push success on expert upload:', stdout);
+          }
+        );
+      } catch {}
+
+      return res.json({
+        success: true,
+        path: publicPath,
+      });
+    } catch (err: any) {
+      console.error('Expert image upload error:', err);
+      return res.status(500).json({ error: err.message });
+    }
+  });
+
   // In development, hook up Vite middleware
   if (process.env.NODE_ENV !== 'production') {
     const { createServer: createViteServer } = await import('vite');
