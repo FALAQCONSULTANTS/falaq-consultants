@@ -119,6 +119,11 @@ export const EXPERTS_LIST: Expert[] = [
     experienceYears: 1,
     image: '/images/experts/eng_abdulaziz.jpg',
     location: 'القصيم',
+    bio: 'طالب هندسة مدنية بجامعة القصيم، مهتم بمجال الاستشارات الهندسية وتطبيقات الهندسة المدنية وإدارة المشاريع.',
+    publicationsOrAchievements: [
+      'لجنة العلاقات والشركات — ASCE.',
+      'الإشراف الهندسي على المشاريع.',
+    ],
     linkedinUrl: 'https://www.linkedin.com/in/abdulaziz-alharbi-23251a30b',
   },
 ];

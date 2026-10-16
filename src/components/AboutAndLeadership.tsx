@@ -177,6 +177,11 @@ export default function AboutAndLeadership() {
       experienceYears: 1,
       image: '/images/experts/eng_abdulaziz.jpg',
       location: 'Al Qassim',
+      bio: 'Civil engineering student at Qassim University, passionate about engineering consultancy, civil engineering applications, and project management.',
+      publicationsOrAchievements: [
+        'Public Relations & Corporate Partnerships Committee — ASCE.',
+        'Engineering Supervision on Construction Projects.',
+      ],
       linkedinUrl: 'https://www.linkedin.com/in/abdulaziz-alharbi-23251a30b',
     },
   ];
