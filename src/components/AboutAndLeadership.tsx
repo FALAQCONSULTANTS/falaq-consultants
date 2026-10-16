@@ -172,6 +172,7 @@ export default function AboutAndLeadership() {
     {
       id: 'eng-abdulaziz-alharbi',
       name: 'Eng. Abdulaziz Al-Harbi',
+      image: '/images/experts/eng_abdulaziz.jpg',
       location: 'Al Qassim',
       linkedinUrl: 'https://www.linkedin.com/in/abdulaziz-alharbi-23251a30b',
     },
