@@ -111,6 +111,12 @@ export const EXPERTS_LIST: Expert[] = [
       'تقارير الفحص والخدمات الفنية (TIS): إدارة فحوصات ضبط الجودة والسلامة للمشاريع بالتنسيق مع جهات الفحص الفني المعتمدة والجهات التأمينية.',
     ],
   },
+  {
+    id: 'eng-abdulaziz-alharbi',
+    name: 'م. عبدالعزيز الحربي',
+    location: 'القصيم',
+    linkedinUrl: 'https://www.linkedin.com/in/abdulaziz-alharbi-23251a30b',
+  },
 ];
 
 export const SERVICE_PACKAGES: ServicePackage[] = [

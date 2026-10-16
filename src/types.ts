@@ -1,13 +1,14 @@
 export interface Expert {
   id: string;
   name: string;
-  title: string;
-  academicDegree: string;
-  specialization: string;
+  title?: string;
+  academicDegree?: string;
+  specialization?: string;
   sceNumber?: string; // Saudi Council of Engineers membership
-  bio: string;
-  experienceYears: number;
-  image: string;
+  bio?: string;
+  experienceYears?: number;
+  image?: string;
+  location?: string;
   linkedinUrl?: string;
   publicationsOrAchievements?: string[];
 }

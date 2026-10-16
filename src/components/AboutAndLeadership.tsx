@@ -98,6 +98,12 @@ export default function AboutAndLeadership() {
         'Balady & Saudi Building Code Compliance and Permitting Coordination',
       ],
     },
+    {
+      id: 'eng-abdulaziz-alharbi',
+      name: 'Eng. Abdulaziz Al-Harbi',
+      location: 'Al Qassim',
+      linkedinUrl: 'https://www.linkedin.com/in/abdulaziz-alharbi-23251a30b',
+    },
   ];
 
   const experts = isAr ? EXPERTS_LIST : englishExperts;
@@ -196,15 +202,17 @@ export default function AboutAndLeadership() {
                           <span>{expert.sceNumber}</span>
                         </div>
                       )}
-                      <span className="text-[11px] text-[#343A2F] font-thmanyah-sans">
-                        {isAr ? `خبرة ${expert.experienceYears} عاماً` : `${expert.experienceYears} Years Exp.`}
-                      </span>
+                      {expert.experienceYears && expert.experienceYears > 0 ? (
+                        <span className="text-[11px] text-[#343A2F] font-thmanyah-sans">
+                          {isAr ? `خبرة ${expert.experienceYears} عاماً` : `${expert.experienceYears} Years Exp.`}
+                        </span>
+                      ) : null}
                     </div>
 
                     {/* Expert Photo / Placeholder Avatar */}
                     <div className="relative shrink-0">
                       <div className="w-18 h-18 sm:w-20 sm:h-20 rounded-sm overflow-hidden border border-[#E0E1DC] shadow-xs group-hover:border-[#343A2F] transition-colors bg-[#F5F4F0]">
-                        {expert.image ? (
+                        {expert.image && expert.image.trim() !== '' ? (
                           <img
                             src={expert.image}
                             alt={expert.name}
@@ -214,7 +222,7 @@ export default function AboutAndLeadership() {
                           <div className="w-full h-full flex flex-col items-center justify-center bg-[#F5F4F0] text-[#343A2F] group-hover:bg-[#0E1910] group-hover:text-[#F4E95B] transition-all p-2">
                             <User className="w-7 h-7 sm:w-8 sm:h-8 stroke-[1.6] mb-0.5 opacity-85 group-hover:opacity-100 transition-opacity" />
                             <span className="text-[9px] font-th-bold tracking-wider font-thmanyah-sans text-center leading-none">
-                              {isAr ? 'مستشار هندسي' : 'Consultant'}
+                              {isAr ? 'مهندس' : 'Engineer'}
                             </span>
                           </div>
                         )}
@@ -230,21 +238,27 @@ export default function AboutAndLeadership() {
                     <h4 className="text-lg sm:text-xl font-th-bold text-[#000000] font-thmanyah-display">
                       {expert.name}
                     </h4>
-                    <p className="text-xs sm:text-sm font-th-medium text-[#0E1910] font-thmanyah-sans">
-                      {expert.title}
-                    </p>
-                    <div className="inline-block text-[11px] px-2 py-0.5 rounded-sm bg-[#F5F4F0] text-[#343A2F] mt-1 border border-[#E0E1DC] font-thmanyah-sans">
-                      {expert.academicDegree}
-                    </div>
+                    {expert.title && expert.title.trim() !== '' && (
+                      <p className="text-xs sm:text-sm font-th-medium text-[#0E1910] font-thmanyah-sans">
+                        {expert.title}
+                      </p>
+                    )}
+                    {expert.academicDegree && expert.academicDegree.trim() !== '' && (
+                      <div className="inline-block text-[11px] px-2 py-0.5 rounded-sm bg-[#F5F4F0] text-[#343A2F] mt-1 border border-[#E0E1DC] font-thmanyah-sans">
+                        {expert.academicDegree}
+                      </div>
+                    )}
                   </div>
 
                   {/* Bio */}
-                  <p className="text-xs sm:text-sm text-[#343A2F] leading-relaxed mb-5 font-thmanyah-text">
-                    {expert.bio}
-                  </p>
+                  {expert.bio && expert.bio.trim() !== '' && (
+                    <p className="text-xs sm:text-sm text-[#343A2F] leading-relaxed mb-5 font-thmanyah-text">
+                      {expert.bio}
+                    </p>
+                  )}
 
                   {/* Key Achievements */}
-                  {expert.publicationsOrAchievements && (
+                  {expert.publicationsOrAchievements && expert.publicationsOrAchievements.length > 0 && (
                     <div className="space-y-1.5 mb-5 pt-3 border-t border-[#E0E1DC]">
                       <div className={`text-[11px] font-th-bold text-[#000000] flex items-center gap-1 font-thmanyah-sans ${isAr ? 'justify-start' : 'justify-start'}`}>
                         <BookOpen className="w-3 h-3 text-[#C0886A]" />
@@ -261,15 +275,15 @@ export default function AboutAndLeadership() {
                 </div>
 
                 {/* Bottom Verification & LinkedIn Link */}
-                <div className="pt-3 border-t border-[#E0E1DC] flex items-center justify-between gap-2">
+                <div className="pt-3 border-t border-[#E0E1DC] flex items-center justify-between gap-2 mt-auto">
                   <div className="flex items-center gap-1.5 text-[11px] font-th-bold text-[#0E1910] bg-[#F5F4F0] px-2 py-1 rounded-sm border border-[#E0E1DC] font-thmanyah-sans">
                     <MapPin className="w-3 h-3 text-[#8C7767] shrink-0" />
-                    <span>{isAr ? 'القصيم • الرياض' : 'Al Qassim • Riyadh'}</span>
+                    <span>{expert.location || (isAr ? 'القصيم • الرياض' : 'Al Qassim • Riyadh')}</span>
                   </div>
 
                   {expert.linkedinUrl ? (
                     <a
-                      href={expert.linkedinUrl}
+                      href={expert.linkedinUrl.startsWith('http') ? expert.linkedinUrl : `https://${expert.linkedinUrl}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-3 py-1 rounded-sm bg-[#0E1910] hover:bg-[#000000] text-[#F5F4F0] text-xs font-th-bold transition-all border border-[#0E1910] font-thmanyah-sans group/btn shadow-xs"
