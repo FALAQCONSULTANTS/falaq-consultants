@@ -285,10 +285,10 @@ export default function AboutAndLeadership() {
               >
                 <div>
                   {/* Top Bar: Avatar & SCE Badge & Single-Use Upload Trigger */}
-                  <div className="flex items-start justify-between gap-4 mb-5">
+                  <div className="flex items-start justify-between gap-4 mb-3 sm:mb-3.5">
                     
                     {/* SCE & Verification Badge & Single-Use Upload Button */}
-                    <div className="flex flex-col items-start gap-1.5">
+                    <div className="flex flex-col items-start gap-1">
                       {expert.sceNumber && (
                         <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-sm bg-[#F5F4F0] border border-[#E0E1DC] text-[11px] font-th-medium text-[#0E1910] font-thmanyah-sans">
                           <ShieldCheck className="w-3.5 h-3.5 text-[#0E1910]" />
@@ -402,7 +402,7 @@ export default function AboutAndLeadership() {
                   </div>
 
                   {/* Name & Academic Title */}
-                  <div className="space-y-0.5 mb-3">
+                  <div className={`space-y-0.5 ${!expert.title || expert.title.trim() === '' ? 'mb-2.5 -mt-2 sm:-mt-2.5' : 'mb-3'}`}>
                     <h4 className="text-lg sm:text-xl font-th-bold text-[#000000] font-thmanyah-display">
                       {expert.name}
                     </h4>
