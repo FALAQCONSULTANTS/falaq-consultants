@@ -172,7 +172,6 @@ export default function AboutAndLeadership() {
     {
       id: 'eng-abdulaziz-alharbi',
       name: 'Eng. Abdulaziz Al-Harbi',
-      title: 'Civil Engineer - Trainee',
       sceNumber: 'Civil Engineer - Trainee',
       experienceYears: 1,
       image: '/images/experts/eng_abdulaziz.jpg',
