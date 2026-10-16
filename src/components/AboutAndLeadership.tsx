@@ -172,6 +172,9 @@ export default function AboutAndLeadership() {
     {
       id: 'eng-abdulaziz-alharbi',
       name: 'Eng. Abdulaziz Al-Harbi',
+      title: 'Civil Engineer - Trainee',
+      sceNumber: 'Civil Engineer - Trainee',
+      experienceYears: 1,
       image: '/images/experts/eng_abdulaziz.jpg',
       location: 'Al Qassim',
       linkedinUrl: 'https://www.linkedin.com/in/abdulaziz-alharbi-23251a30b',
@@ -290,7 +293,11 @@ export default function AboutAndLeadership() {
                       )}
                       {expert.experienceYears && expert.experienceYears > 0 ? (
                         <span className="text-[11px] text-[#343A2F] font-thmanyah-sans">
-                          {isAr ? `خبرة ${expert.experienceYears} عاماً` : `${expert.experienceYears} Years Exp.`}
+                          {isAr
+                            ? expert.experienceYears === 1
+                              ? 'خبرة سنة'
+                              : `خبرة ${expert.experienceYears} عاماً`
+                            : `${expert.experienceYears} Year${expert.experienceYears > 1 ? 's' : ''} Exp.`}
                         </span>
                       ) : null}
 

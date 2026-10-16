@@ -114,6 +114,9 @@ export const EXPERTS_LIST: Expert[] = [
   {
     id: 'eng-abdulaziz-alharbi',
     name: 'م. عبدالعزيز الحربي',
+    title: 'مهندس مدني - متدرب',
+    sceNumber: 'مهندس مدني - متدرب',
+    experienceYears: 1,
     image: '/images/experts/eng_abdulaziz.jpg',
     location: 'القصيم',
     linkedinUrl: 'https://www.linkedin.com/in/abdulaziz-alharbi-23251a30b',
